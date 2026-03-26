@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StreamForge Player Mockup</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: #101010;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px;
+      }
+
+      .player-container {
+        display: flex;
+        gap: 40px;
+        max-width: 1200px;
+      }
+
+      .video-section {
+        flex: 2;
+      }
+
+      video {
+        width: 100%;
+        border-radius: 8px;
+        border: 2px solid #1976ba;
+        background: #000;
+      }
+
+      .info-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .info-section h2 {
+        margin: 0;
+        font-size: 1.6rem;
+      }
+
+      .info-section p {
+        font-size: 0.9rem;
+        line-height: 1.4;
+      }
+
+      .tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .tag {
+        background: #222;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        border: 1px solid #1976ba;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .meta div {
+        background: #1a1a1a;
+        padding: 8px;
+        border-radius: 4px;
+        text-align: center;
+        font-size: 0.8rem;
+      }
+
+      button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.9rem;
+      }
+
+      .publish-btn {
+        background: linear-gradient(90deg, #ff7b4a, #ff4a4a);
+        color: #fff;
+        margin-top: 12px;
+      }
+
+      .share-btn {
+        background: #222;
+        color: #fff;
+        border: 1px solid #444;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="player-container">
+      <div class="video-section">
+        <video id="video" controls></video>
+      </div>
+      <div class="info-section">
+        <h2>Project Alpha Cinematic</h2>
+        <div class="tags">
+          <div class="tag">HLS/m3u8</div>
+          <div class="tag">6.4 Mbps</div>
+          <div class="tag">4K UHD</div>
+        </div>
+        <p>
+          Exploring the kinetic energy of the forge. This master edit features
+          multi-angle HLS synchronization and adaptive bitrate testing across
+          high-latency environments.
+        </p>
+        <div class="meta">
+          <div><strong>Codec</strong><br />H.264 High</div>
+          <div><strong>FPS</strong><br />59.94</div>
+          <div><strong>Duration</strong><br />00:10:15</div>
+          <div><strong>Owner</strong><br />Forge_Studio</div>
+        </div>
+        <button class="publish-btn">Publish Stream</button>
+        <button class="share-btn">Share Link</button>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.2/dist/hls.min.js"></script>
+    <script>
+      const video = document.getElementById("video");
+      const videoSrc =
+        "http://localhost:3000/videos/a32bd6bb-801b-4626-9228-6a29ecb64e9d/hls/master.m3u8"; // სატესტო ვიდეო
+
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        video.src = videoSrc;
+        video.addEventListener("loadedmetadata", function () {
+          video.play();
+        });
+      } else {
+        alert("Your browser does not support HLS playback");
+      }
+    </script>
+  </body>
+</html>

@@ -13,9 +13,17 @@ const connection = {
 new Worker(
   "video",
   async (job) => {
+    console.log("🎬 JOB RECEIVED:", job.id, job.name);
+
     if (job.name !== "transcode") return;
+
     const { videoId } = job.data as { videoId: string };
+
+    console.log("🚀 processing video:", videoId);
+
     await transcodeToHls(videoId);
+
+    console.log("✅ DONE:", videoId);
   },
   { connection, concurrency: 1 },
 );

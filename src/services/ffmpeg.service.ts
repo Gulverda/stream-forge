@@ -1,12 +1,16 @@
 import fs from "node:fs";
 import { spawn } from "node:child_process";
 import { hlsDir, masterPlaylistPath, sourcePath } from "./paths.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export function transcodeToHls(videoId: string): Promise<void> {
   return new Promise((resolve, reject) => {
     const input = sourcePath(videoId);
     const outDir = hlsDir(videoId);
     const outM3u8 = masterPlaylistPath(videoId);
+    const ffmpegPath = process.env.FFMPEG_PATH;
 
     fs.mkdirSync(outDir, { recursive: true });
 
@@ -36,7 +40,7 @@ export function transcodeToHls(videoId: string): Promise<void> {
       outM3u8,
     ];
 
-    const ff = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] });
+    const ff = spawn(ffmpegPath!, args, { stdio: ["ignore", "pipe", "pipe"] });
 
     ff.stderr.on("data", (d) => {
       // FFmpeg logs on stderr; useful for debugging --
@@ -45,6 +49,8 @@ export function transcodeToHls(videoId: string): Promise<void> {
 
     ff.on("error", (err) => reject(err));
     ff.on("close", (code) => {
+      console.log("⚙️ ffmpeg exited with code:", code);
+
       if (code === 0) resolve();
       else reject(new Error(`ffmpeg exited with code ${code}`));
     });
