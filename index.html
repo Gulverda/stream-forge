@@ -3,152 +3,738 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StreamForge Player Mockup</title>
+    <title>StreamForge Pro</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
+      :root {
+        --bg-dark: #0f0f0f;
+        --sidebar-bg: #161616;
+        --card-bg: #1a1a1a;
+        --accent-orange: #ff5722;
+        --text-gray: #a0a0a0;
+        --border-color: #2a2a2a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
-        font-family: "Segoe UI", sans-serif;
-        background-color: #101010;
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-dark);
         color: #fff;
         display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 40px;
+        height: 100vh;
+        overflow: hidden;
       }
 
-      .player-container {
-        display: flex;
-        gap: 40px;
-        max-width: 1200px;
-      }
-
-      .video-section {
-        flex: 2;
-      }
-
-      video {
-        width: 100%;
-        border-radius: 8px;
-        border: 2px solid #1976ba;
-        background: #000;
-      }
-
-      .info-section {
-        flex: 1;
+      /* ── Sidebar ── */
+      .sidebar {
+        width: 260px;
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--border-color);
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        padding: 24px;
+        flex-shrink: 0;
       }
 
-      .info-section h2 {
-        margin: 0;
-        font-size: 1.6rem;
-      }
-
-      .info-section p {
-        font-size: 0.9rem;
-        line-height: 1.4;
-      }
-
-      .tags {
+      .logo {
         display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+        color: #fff;
+        cursor: default;
+        user-select: none;
       }
 
-      .tag {
-        background: #222;
+      .logo-icon {
+        background: var(--accent-orange);
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        color: var(--text-gray);
+        border-radius: 8px;
+        transition: 0.2s;
+        margin-bottom: 5px;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .nav-item.active {
+        background: #252525;
+        color: #fff;
+      }
+      .nav-item:hover {
+        background: #202020;
+        color: #fff;
+      }
+
+      .upload-btn {
+        background: var(--accent-orange);
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        transition: 0.2s;
+      }
+      .upload-btn:hover {
+        background: #e64a19;
+      }
+
+      /* ── Main ── */
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+      }
+
+      .page {
+        display: none;
+        padding: 40px;
+      }
+      .page.active {
+        display: block;
+      }
+
+      /* ── Dashboard ── */
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        margin-top: 30px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 30px;
+        border: 1px solid var(--border-color);
+      }
+
+      .drop-zone {
+        border: 2px dashed #333;
+        border-radius: 12px;
+        padding: 60px 20px;
+        text-align: center;
+        background: #121212;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      .drop-zone:hover {
+        border-color: #555;
+      }
+      .drop-zone.dragover {
+        border-color: var(--accent-orange);
+        background: #1a1512;
+      }
+
+      #video-container {
+        display: none;
+        margin-top: 25px;
+      }
+      video {
+        width: 100%;
+        border-radius: 12px;
+        background: #000;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      .progress-bar {
+        background: #333;
+        height: 6px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px 0;
+      }
+      .progress-fill {
+        background: var(--accent-orange);
+        width: 0%;
+        height: 100%;
+        transition: 0.4s;
+      }
+
+      .stats-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 50px;
+        padding-top: 30px;
+        border-top: 1px solid var(--border-color);
+      }
+
+      /* ── Library ── */
+      .library-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+      }
+
+      .refresh-btn {
+        background: #252525;
+        color: var(--text-gray);
+        border: 1px solid var(--border-color);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        transition: 0.2s;
+      }
+      .refresh-btn:hover {
+        color: #fff;
+        border-color: #444;
+      }
+
+      .video-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .video-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .video-card:hover {
+        border-color: var(--accent-orange);
+        transform: translateY(-2px);
+      }
+
+      .video-thumb {
+        width: 100%;
+        aspect-ratio: 16/9;
+        background: #111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      .play-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.4);
+        opacity: 0;
+        transition: 0.2s;
+      }
+      .video-card:hover .play-overlay {
+        opacity: 1;
+      }
+      .play-overlay i {
+        font-size: 2.5rem;
+        color: #fff;
+      }
+
+      .video-card-info {
+        padding: 14px 16px;
+      }
+      .video-card-id {
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        font-family: monospace;
+        margin-bottom: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .video-card-date {
+        font-size: 0.8rem;
+        color: #666;
+      }
+      .video-card-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #1a2a1a;
+        color: #4caf50;
+        border: 1px solid #2a3a2a;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        margin-bottom: 8px;
+      }
+
+      .library-empty {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 80px 20px;
+        color: var(--text-gray);
+      }
+      .library-empty i {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.3;
+        display: block;
+      }
+
+      /* ── Modal ── */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+
+      .modal-box {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        width: 100%;
+        max-width: 900px;
+        overflow: hidden;
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .modal-header span {
+        font-size: 0.85rem;
+        color: var(--text-gray);
+        font-family: monospace;
+      }
+
+      .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-gray);
+        font-size: 1.2rem;
+        cursor: pointer;
         padding: 4px 8px;
         border-radius: 4px;
-        font-size: 0.75rem;
-        border: 1px solid #1976ba;
+        transition: 0.2s;
       }
-
-      .meta {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .meta div {
-        background: #1a1a1a;
-        padding: 8px;
-        border-radius: 4px;
-        text-align: center;
-        font-size: 0.8rem;
-      }
-
-      button {
-        padding: 12px 20px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 0.9rem;
-      }
-
-      .publish-btn {
-        background: linear-gradient(90deg, #ff7b4a, #ff4a4a);
+      .modal-close:hover {
         color: #fff;
-        margin-top: 12px;
+        background: #333;
       }
 
-      .share-btn {
-        background: #222;
-        color: #fff;
-        border: 1px solid #444;
+      .modal-video video {
+        width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        display: block;
       }
     </style>
   </head>
   <body>
-    <div class="player-container">
-      <div class="video-section">
-        <video id="video" controls></video>
+    <aside class="sidebar">
+      <span class="logo">
+        <div class="logo-icon"><i class="fas fa-hammer"></i></div>
+        StreamForge
+      </span>
+      <nav>
+        <span class="nav-item active" data-page="dashboard">
+          <i class="fas fa-columns"></i> DASHBOARD
+        </span>
+        <span class="nav-item" data-page="library">
+          <i class="fas fa-folder"></i> LIBRARY
+        </span>
+      </nav>
+      <button type="button" class="upload-btn" id="uploadBtn">
+        <i class="fas fa-plus"></i> UPLOAD VIDEO
+      </button>
+      <input type="file" id="fileInput" hidden accept="video/*" />
+    </aside>
+
+    <main class="main-content">
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <header>
+          <h1 style="font-size: 2.5rem; margin: 0">Forge Your Vision</h1>
+          <p style="color: var(--text-gray)">
+            Manage your high-performance video delivery and HLS transcoding.
+          </p>
+        </header>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <h3>Upload & Preview</h3>
+            <div class="drop-zone" id="dropZone">
+              <i
+                class="fas fa-cloud-upload-alt"
+                style="
+                  font-size: 3rem;
+                  color: var(--accent-orange);
+                  margin-bottom: 15px;
+                  display: block;
+                "
+              ></i>
+              <p style="margin: 0">Drag video here or click to browse</p>
+            </div>
+            <div id="video-container">
+              <h4 id="active-video-name"></h4>
+              <video id="dashVideo" controls></video>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>PROCESSING QUEUE</h3>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.9rem;
+              "
+            >
+              <span id="status-text">Idle</span>
+              <span id="percent-text">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <p
+              style="font-size: 0.8rem; color: var(--text-gray)"
+              id="queue-filename"
+            >
+              No active tasks
+            </p>
+          </div>
+        </div>
+
+        <footer class="stats-footer">
+          <div>
+            <small style="color: var(--text-gray)">GLOBAL REACH</small>
+            <div style="font-size: 1.2rem; font-weight: bold">142k</div>
+          </div>
+          <div>
+            <small style="color: var(--text-gray)">DATA STREAMED</small>
+            <div style="font-size: 1.2rem; font-weight: bold">4.8 TB</div>
+          </div>
+          <div>
+            <small style="color: var(--text-gray)">AVG. BITRATE</small>
+            <div style="font-size: 1.2rem; font-weight: bold">12.5 Mbps</div>
+          </div>
+        </footer>
       </div>
-      <div class="info-section">
-        <h2>Project Alpha Cinematic</h2>
-        <div class="tags">
-          <div class="tag">HLS/m3u8</div>
-          <div class="tag">6.4 Mbps</div>
-          <div class="tag">4K UHD</div>
+
+      <!-- LIBRARY -->
+      <div class="page" id="page-library">
+        <div class="library-header">
+          <div>
+            <h1 style="font-size: 2.5rem; margin: 0">Library</h1>
+            <p style="color: var(--text-gray); margin: 4px 0 0">
+              All transcoded videos ready to stream.
+            </p>
+          </div>
+          <button type="button" class="refresh-btn" id="refreshBtn">
+            <i class="fas fa-rotate-right"></i> Refresh
+          </button>
         </div>
-        <p>
-          Exploring the kinetic energy of the forge. This master edit features
-          multi-angle HLS synchronization and adaptive bitrate testing across
-          high-latency environments.
-        </p>
-        <div class="meta">
-          <div><strong>Codec</strong><br />H.264 High</div>
-          <div><strong>FPS</strong><br />59.94</div>
-          <div><strong>Duration</strong><br />00:10:15</div>
-          <div><strong>Owner</strong><br />Forge_Studio</div>
+        <div class="video-grid" id="videoGrid"></div>
+      </div>
+    </main>
+
+    <!-- MODAL PLAYER -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-box">
+        <div class="modal-header">
+          <span id="modalTitle"></span>
+          <button type="button" class="modal-close" id="modalClose">
+            <i class="fas fa-xmark"></i>
+          </button>
         </div>
-        <button class="publish-btn">Publish Stream</button>
-        <button class="share-btn">Share Link</button>
+        <div class="modal-video">
+          <video id="modalVideo" controls></video>
+        </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.2/dist/hls.min.js"></script>
     <script>
-      const video = document.getElementById("video");
-      const videoSrc =
-        "http://localhost:3000/videos/a32bd6bb-801b-4626-9228-6a29ecb64e9d/hls/master.m3u8"; // სატესტო ვიდეო
+      const dropZone = document.getElementById("dropZone");
+      const fileInput = document.getElementById("fileInput");
+      const uploadBtn = document.getElementById("uploadBtn");
+      const dashVideo = document.getElementById("dashVideo");
+      const progressFill = document.getElementById("progressFill");
+      const statusText = document.getElementById("status-text");
+      const percentText = document.getElementById("percent-text");
+      const modalOverlay = document.getElementById("modalOverlay");
+      const modalVideo = document.getElementById("modalVideo");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalClose = document.getElementById("modalClose");
+      const videoGrid = document.getElementById("videoGrid");
+      const refreshBtn = document.getElementById("refreshBtn");
 
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(videoSrc);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-          video.play();
+      let activeHls = null;
+
+      // ── Navigation ──
+      document.querySelectorAll(".nav-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          document
+            .querySelectorAll(".nav-item")
+            .forEach((n) => n.classList.remove("active"));
+          document
+            .querySelectorAll(".page")
+            .forEach((p) => p.classList.remove("active"));
+          item.classList.add("active");
+          document
+            .getElementById("page-" + item.dataset.page)
+            .classList.add("active");
+          if (item.dataset.page === "library") loadLibrary();
         });
-      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = videoSrc;
-        video.addEventListener("loadedmetadata", function () {
-          video.play();
+      });
+
+      // ── Upload triggers ──
+      uploadBtn.addEventListener("click", () => fileInput.click());
+      dropZone.addEventListener("click", () => fileInput.click());
+
+      ["dragenter", "dragover"].forEach((e) =>
+        dropZone.addEventListener(e, (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          dropZone.classList.add("dragover");
+        }),
+      );
+      ["dragleave", "drop"].forEach((e) =>
+        dropZone.addEventListener(e, (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          dropZone.classList.remove("dragover");
+        }),
+      );
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const file = e.dataTransfer.files[0];
+        if (file) uploadFile(file);
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) uploadFile(file);
+        fileInput.value = "";
+      });
+
+      // ── Upload ──
+      function uploadFile(file) {
+        if (!file || !file.type.startsWith("video/")) {
+          alert("Please select a video file");
+          return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        statusText.innerText = "Uploading...";
+        percentText.innerText = "0%";
+        progressFill.style.width = "0%";
+        document.getElementById("queue-filename").innerText = file.name;
+
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progressFill.style.width = pct + "%";
+            percentText.innerText = pct + "%";
+          }
         });
-      } else {
-        alert("Your browser does not support HLS playback");
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const data = JSON.parse(xhr.responseText);
+              if (data.streamUrl) {
+                waitForTranscoding(
+                  `http://localhost:3000${data.streamUrl}`,
+                  file.name,
+                );
+              } else {
+                statusText.innerText = "Error: No stream URL";
+                console.error("Server response:", data);
+              }
+            } catch (e) {
+              statusText.innerText = "Error parsing response";
+              console.error("Raw:", xhr.responseText);
+            }
+          } else {
+            statusText.innerText = `Server error: ${xhr.status}`;
+            console.error("Server returned:", xhr.status, xhr.responseText);
+          }
+        });
+
+        xhr.addEventListener("error", () => {
+          statusText.innerText = "Connection failed";
+          alert(
+            "Server connection failed. Is the backend running on port 3000?",
+          );
+        });
+
+        xhr.open("POST", "http://localhost:3000/upload");
+        xhr.send(formData);
       }
+
+      function waitForTranscoding(url, name) {
+        statusText.innerText = "Transcoding HLS...";
+        progressFill.style.width = "50%";
+        percentText.innerText = "50%";
+
+        const checkInterval = setInterval(async () => {
+          try {
+            const res = await fetch(url);
+            if (res.ok) {
+              clearInterval(checkInterval);
+              finishProcess(url, name);
+            }
+          } catch (e) {
+            /* still waiting */
+          }
+        }, 3000);
+      }
+
+      function finishProcess(url, name) {
+        statusText.innerText = "Ready ✓";
+        percentText.innerText = "100%";
+        progressFill.style.width = "100%";
+        document.getElementById("video-container").style.display = "block";
+        document.getElementById("active-video-name").innerText = name;
+        playHls(dashVideo, url);
+      }
+
+      // ── HLS helper ──
+      function playHls(videoEl, url) {
+        if (activeHls) {
+          activeHls.destroy();
+          activeHls = null;
+        }
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          activeHls = hls;
+          hls.loadSource(url);
+          hls.attachMedia(videoEl);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => videoEl.play());
+        } else if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
+          videoEl.src = url;
+          videoEl.play();
+        }
+      }
+
+      // ── Library ──
+      async function loadLibrary() {
+        videoGrid.innerHTML = `<div style="color:var(--text-gray);padding:40px;text-align:center;grid-column:1/-1"><i class="fas fa-spinner fa-spin"></i> Loading...</div>`;
+
+        try {
+          const res = await fetch("http://localhost:3000/videos/list");
+          const data = await res.json();
+
+          videoGrid.innerHTML = "";
+
+          if (!data.videos || data.videos.length === 0) {
+            videoGrid.innerHTML = `
+              <div class="library-empty">
+                <i class="fas fa-film"></i>
+                <p>No videos yet. Upload one from the Dashboard.</p>
+              </div>`;
+            return;
+          }
+
+          data.videos.forEach((v) => {
+            const card = document.createElement("div");
+            card.className = "video-card";
+
+            const date = v.createdAt
+              ? new Date(v.createdAt).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })
+              : "Unknown date";
+
+            card.innerHTML = `
+              <div class="video-thumb">
+                <i class="fas fa-film" style="font-size:2rem;color:#333"></i>
+                <div class="play-overlay"><i class="fas fa-circle-play"></i></div>
+              </div>
+              <div class="video-card-info">
+                <div class="video-card-badge"><i class="fas fa-circle" style="font-size:6px"></i> READY</div>
+                <div class="video-card-id">${v.videoId}</div>
+                <div class="video-card-date">${date}</div>
+              </div>`;
+
+            card.addEventListener("click", () => openModal(v));
+            videoGrid.appendChild(card);
+          });
+        } catch (err) {
+          videoGrid.innerHTML = `<div style="color:#f44;padding:40px;text-align:center;grid-column:1/-1">Failed to load library. Is the server running?</div>`;
+          console.error("Library fetch error:", err);
+        }
+      }
+
+      refreshBtn.addEventListener("click", loadLibrary);
+
+      // ── Modal ──
+      function openModal(v) {
+        modalTitle.innerText = v.videoId;
+        modalOverlay.classList.add("open");
+        playHls(modalVideo, `http://localhost:3000${v.streamUrl}`);
+      }
+
+      function closeModal() {
+        modalOverlay.classList.remove("open");
+        modalVideo.pause();
+        modalVideo.src = "";
+        if (activeHls) {
+          activeHls.destroy();
+          activeHls = null;
+        }
+      }
+
+      modalClose.addEventListener("click", closeModal);
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) closeModal();
+      });
+
+      // Close modal on Escape
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeModal();
+      });
     </script>
   </body>
 </html>

@@ -22,7 +22,15 @@ export function uploadRoute(req: Request, res: Response) {
     }
 
     const videoId = crypto.randomUUID();
-    fs.mkdirSync(videoDir(videoId), { recursive: true });
+
+    // 1. Catch mkdirSync failures
+    try {
+      fs.mkdirSync(videoDir(videoId), { recursive: true });
+    } catch (err) {
+      console.error("Failed to create video directory:", err);
+      res.status(500).json({ error: "Failed to create video directory" });
+      return;
+    }
 
     const saveTo = sourcePath(videoId);
     const ws = fs.createWriteStream(saveTo);
@@ -30,18 +38,33 @@ export function uploadRoute(req: Request, res: Response) {
     file.pipe(ws);
 
     ws.on("close", async () => {
-      const job = await enqueueTranscode(videoId);
-      res.json({
-        videoId,
-        jobId: job.id,
-        source: path.basename(saveTo),
-        streamUrl: `/videos/${videoId}/hls/master.m3u8`,
-      });
+      // 2. THIS is almost certainly your bug — enqueueTranscode crashing silently
+      try {
+        const job = await enqueueTranscode(videoId);
+        res.json({
+          videoId,
+          jobId: job.id,
+          source: path.basename(saveTo),
+          streamUrl: `/videos/${videoId}/hls/master.m3u8`,
+        });
+      } catch (err) {
+        console.error("enqueueTranscode failed:", err); // <-- check your terminal for this
+        res
+          .status(500)
+          .json({ error: "Transcoding queue failed: " + String(err) });
+      }
     });
 
-    ws.on("error", () => {
+    ws.on("error", (err) => {
+      console.error("Write stream error:", err);
       res.status(500).json({ error: "Failed to save file" });
     });
+  });
+
+  bb.on("error", (err) => {
+    // 3. Busboy errors were also uncaught
+    console.error("Busboy error:", err);
+    res.status(500).json({ error: "Upload parsing failed" });
   });
 
   bb.on("finish", () => {
